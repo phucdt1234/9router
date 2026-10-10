@@ -1,0 +1,30 @@
+name: Build Linux 9Router
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm prune --omit=dev
+
+      - run: |
+          mkdir deploy
+          cp -r .next public node_modules package.json package-lock.json deploy/
+          tar -czf 9router-linux.tar.gz -C deploy .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 9router-linux
+          path: 9router-linux.tar.gz
+          retention-days: 1
